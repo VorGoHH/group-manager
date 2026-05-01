@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управління групою</title>
+    <style>
+        .nav { display: flex; gap: 16px; align-items: center; }
+        .nav a { color: white; text-decoration: none; opacity: 0.7; font-size: 14px; }
+        .nav a:hover { opacity: 1; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f0f2f5; color: #333; }
+        .header { background: #1a3a5c; color: white; padding: 16px 24px;
+                  display: flex; justify-content: space-between; align-items: center; }
+        .header h1 { font-size: 20px; }
+        .date-info { font-size: 14px; opacity: 0.8; }
+        .container { max-width: 1100px; margin: 24px auto; padding: 0 16px; }
+        .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+        .stat-card { background: white; border-radius: 8px; padding: 20px;
+                     text-align: center; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+        .stat-card .number { font-size: 36px; font-weight: bold; }
+        .stat-card .label { font-size: 13px; color: #666; margin-top: 4px; }
+        .stat-card.present .number { color: #2e7d32; }
+        .stat-card.absent .number { color: #c62828; }
+        .stat-card.total .number { color: #1565c0; }
+        .section { background: white; border-radius: 8px; padding: 20px;
+                   box-shadow: 0 1px 4px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .section h2 { font-size: 16px; margin-bottom: 16px;
+                      padding-bottom: 8px; border-bottom: 2px solid #e0e0e0; }
+        .soldiers-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+        .soldier-card { border: 1px solid #e0e0e0; border-radius: 6px;
+                        padding: 10px 12px; cursor: pointer; transition: all 0.2s; }
+        .soldier-card:hover { border-color: #1a3a5c; background: #f5f8ff; }
+        .soldier-card .name { font-size: 14px; font-weight: 500; }
+        .soldier-card .rank { font-size: 12px; color: #666; margin-top: 2px; }
+        .soldier-card .platoon { font-size: 11px; color: #999; }
+        .absence-item { display: flex; justify-content: space-between; align-items: center;
+                        padding: 10px; border-bottom: 1px solid #f0f0f0; }
+        .absence-item:last-child { border-bottom: none; }
+        .reason-badge { font-size: 12px; padding: 2px 8px; border-radius: 12px; font-weight: 500; }
+        .SICK { background: #fce4ec; color: #c62828; }
+        .EXCUSED { background: #e8f5e9; color: #2e7d32; }
+        .BUSINESS_TRIP { background: #e3f2fd; color: #1565c0; }
+        .INDIVIDUAL { background: #f3e5f5; color: #6a1b9a; }
+        .ILLEGAL { background: #ffebee; color: #b71c1c; }
+        .ON_DUTY { background: #fff8e1; color: #e65100; }
+        .btn-return { background: none; border: 1px solid #ccc; border-radius: 4px;
+                      padding: 4px 10px; cursor: pointer; font-size: 12px; color: #555; }
+        .btn-return:hover { border-color: #1a3a5c; color: #1a3a5c; }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0;
+                         width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 100; }
+        .modal { background: white; border-radius: 8px; padding: 24px;
+                 width: 360px; margin: 15% auto; }
+        .modal h3 { margin-bottom: 16px; }
+        .modal select, .modal input { width: 100%; padding: 8px; margin-bottom: 12px;
+                                       border: 1px solid #ddd; border-radius: 4px; font-size: 14px; }
+        .modal-buttons { display: flex; gap: 8px; justify-content: flex-end; }
+        .btn-primary { background: #1a3a5c; color: white; border: none;
+                       padding: 8px 16px; border-radius: 4px; cursor: pointer; }
+        .btn-cancel { background: #f5f5f5; color: #333; border: none;
+                      padding: 8px 16px; border-radius: 4px; cursor: pointer; }
+        .empty-state { text-align: center; padding: 30px; color: #999; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>241 навчальна група</h1>
+    <nav class="nav">
+        <a href="/">Розхід</a>
+        <a href="/duties.html">Наряди</a>
+    </nav>
+    <span class="date-info" id="currentDate"></span>
+</div>
+
+<div class="container">
+    <div class="stats">
+        <div class="stat-card total">
+            <div class="number" id="totalCount">—</div>
+            <div class="label">За списком</div>
+        </div>
+        <div class="stat-card present">
+            <div class="number" id="presentCount">—</div>
+            <div class="label">В наявності</div>
+        </div>
+        <div class="stat-card absent">
+            <div class="number" id="absentCount">—</div>
+            <div class="label">Відсутні</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Особовий склад — клікни на солдата щоб відмітити відсутнім</h2>
+        <div class="soldiers-grid" id="soldiersGrid"></div>
+    </div>
+
+    <div class="section">
+        <h2>Відсутні</h2>
+        <div id="absencesList">
+            <div class="empty-state">Всі присутні</div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальне вікно -->
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+        <h3 id="modalTitle">Відмітити відсутнім</h3>
+        <select id="reasonSelect">
+            <option value="SICK">Хворий</option>
+            <option value="EXCUSED">Звільнення</option>
+            <option value="BUSINESS_TRIP">Відрядження</option>
+            <option value="INDIVIDUAL">Індивідуальні заняття</option>
+            <option value="ILLEGAL">Незаконно відсутній</option>
+            <option value="ON_DUTY">Наряд</option>
+        </select>
+        <input type="text" id="noteInput" placeholder="Примітка (необов'язково)">
+        <div class="modal-buttons">
+            <button class="btn-cancel" onclick="closeModal()">Скасувати</button>
+            <button class="btn-primary" onclick="confirmAbsent()">Підтвердити</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const REASON_LABELS = {
+        SICK: 'Хворий', EXCUSED: 'Звільнення', BUSINESS_TRIP: 'Відрядження',
+        INDIVIDUAL: 'І/з', ILLEGAL: 'Н/в', ON_DUTY: 'Наряд'
+    };
+
+    let selectedSoldierId = null;
+    let today = new Date().toISOString().split('T')[0];
+
+    document.getElementById('currentDate').textContent =
+        new Date().toLocaleDateString('uk-UA', {weekday:'long', day:'numeric', month:'long'});
+
+    async function loadAttendance() {
+        const res = await fetch(`/api/attendance?date=${today}`);
+        const data = await res.json();
+
+        document.getElementById('totalCount').textContent = data.total;
+        document.getElementById('presentCount').textContent = data.presentCount;
+        document.getElementById('absentCount').textContent = data.absences.length;
+
+        const absentIds = data.absences.map(a => a.soldier.id);
+        const grid = document.getElementById('soldiersGrid');
+        grid.innerHTML = '';
+
+        data.present.forEach(s => {
+            const card = document.createElement('div');
+            card.className = 'soldier-card';
+            card.innerHTML = `
+                <div class="name">${s.lastName} ${s.firstName}</div>
+                <div class="rank">${s.rank}</div>
+                <div class="platoon">${s.platoon} відділення</div>`;
+            card.onclick = () => openModal(s.id, s.lastName + ' ' + s.firstName);
+            grid.appendChild(card);
+        });
+
+        const list = document.getElementById('absencesList');
+        if (data.absences.length === 0) {
+            list.innerHTML = '<div class="empty-state">Всі присутні</div>';
+        } else {
+            list.innerHTML = data.absences.map(a => `
+                <div class="absence-item">
+                    <div>
+                        <strong>${a.soldier.lastName} ${a.soldier.firstName}</strong>
+                        <span class="reason-badge ${a.reason}">${REASON_LABELS[a.reason]}</span>
+                        ${a.note ? `<span style="font-size:12px;color:#999"> — ${a.note}</span>` : ''}
+                    </div>
+                    <button class="btn-return" onclick="markPresent(${a.soldier.id})">Повернути</button>
+                </div>`).join('');
+        }
+    }
+
+    function openModal(id, name) {
+        selectedSoldierId = id;
+        document.getElementById('modalTitle').textContent = name;
+        document.getElementById('noteInput').value = '';
+        document.getElementById('modalOverlay').style.display = 'block';
+    }
+
+    function closeModal() {
+        document.getElementById('modalOverlay').style.display = 'none';
+        selectedSoldierId = null;
+    }
+
+    async function confirmAbsent() {
+        const reason = document.getElementById('reasonSelect').value;
+        const note = document.getElementById('noteInput').value;
+        await fetch('/api/attendance/absent', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({soldierId: selectedSoldierId, date: today, reason, note})
+        });
+        closeModal();
+        loadAttendance();
+    }
+
+    async function markPresent(soldierId) {
+        await fetch(`/api/attendance/absent/${soldierId}?date=${today}`, {method: 'DELETE'});
+        loadAttendance();
+    }
+
+    loadAttendance();
+</script>
+</body>
+</html>
