@@ -6,7 +6,15 @@ import java.time.LocalDate;
 
 @Data
 @Entity
-@Table(name = "duties")
+@Table(
+        name = "duties",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uq_duty_soldier_date",
+                        columnNames = {"duty_date", "soldier_id"}
+                )
+        }
+)
 public class Duty {
 
     @Column(name = "duty_type")

@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Статистика — 241 н.г.</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #1a1a2e;
+            color: #e0e0e0;
+            min-height: 100vh;
+        }
+
+        nav {
+            background: #16213e;
+            padding: 12px 24px;
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            border-bottom: 1px solid #0f3460;
+        }
+
+        nav a {
+            color: #a0a0c0;
+            text-decoration: none;
+            font-size: 14px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+
+        nav a:hover { background: #0f3460; color: #e0e0e0; }
+        nav a.active { background: #0f3460; color: #fff; }
+
+        .container {
+            max-width: 1100px;
+            margin: 32px auto;
+            padding: 0 16px;
+        }
+
+        h1 {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            color: #fff;
+        }
+
+        .platoon-section {
+            margin-bottom: 32px;
+        }
+
+        .platoon-title {
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #7080a0;
+            margin-bottom: 10px;
+            padding-left: 4px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #16213e;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        thead th {
+            background: #0f3460;
+            padding: 10px 14px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: #a0b0d0;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #1e2d4a;
+            transition: background 0.15s;
+        }
+
+        tbody tr:last-child { border-bottom: none; }
+        tbody tr:hover { background: #1e2d4a; }
+
+        td {
+            padding: 10px 14px;
+            font-size: 14px;
+        }
+
+        td.name { font-weight: 500; color: #fff; }
+        td.rank { color: #7080a0; font-size: 13px; }
+
+        td.num {
+            text-align: center;
+            font-variant-numeric: tabular-nums;
+        }
+
+        td.total {
+            font-weight: 700;
+            color: #5b9bd5;
+            text-align: center;
+        }
+
+        td.zero { color: #3a4a6a; }
+
+        .loading {
+            text-align: center;
+            padding: 60px;
+            color: #5060a0;
+            font-size: 15px;
+        }
+
+        .error {
+            text-align: center;
+            padding: 40px;
+            color: #c0504a;
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <a href="/">Розхід</a>
+    <a href="/duties.html">Наряди</a>
+    <a href="/cleaning.html">Прибирання</a>
+    <a href="/stats.html" class="active">Статистика</a>
+</nav>
+
+<div class="container">
+    <h1>Статистика нарядів і прибирань</h1>
+    <div id="content">
+        <div class="loading">Завантаження...</div>
+    </div>
+</div>
+
+<script>
+    const PLATOON_LABELS = {
+        1: '1 відділення',
+        2: '2 відділення',
+        3: '3 відділення'
+    };
+
+    const ROLES = ['Черговий ПУ', 'Помічник ЧПУ', 'Днювальний', 'Їдальня'];
+
+    async function load() {
+        try {
+            const res = await fetch('/api/stats');
+            if (!res.ok) throw new Error('Помилка сервера');
+            const data = await res.json();
+            render(data);
+        } catch (e) {
+            document.getElementById('content').innerHTML =
+                `<div class="error">Помилка завантаження: ${e.message}</div>`;
+        }
+    }
+
+    function render(data) {
+        // Групуємо по відділеннях
+        const byPlatoon = {};
+        for (const row of data) {
+            const p = row.platoon;
+            if (!byPlatoon[p]) byPlatoon[p] = [];
+            byPlatoon[p].push(row);
+        }
+
+        let html = '';
+
+        for (const platoon of [1, 2, 3]) {
+            const soldiers = byPlatoon[platoon] || [];
+            if (!soldiers.length) continue;
+
+            html += `
+                <div class="platoon-section">
+                    <div class="platoon-title">${PLATOON_LABELS[platoon]}</div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Прізвище</th>
+                                <th>Звання</th>
+                                <th>Черг. ПУ</th>
+                                <th>Пом. ЧПУ</th>
+                                <th>Днюв.</th>
+                                <th>Їдальня</th>
+                                <th>Всього нарядів</th>
+                                <th>Прибирань</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            for (const s of soldiers) {
+                const r = s.dutyByRole;
+                const cells = ROLES.map(role => {
+                    const val = r[role] || 0;
+                    return `<td class="num ${val === 0 ? 'zero' : ''}">${val}</td>`;
+                }).join('');
+
+                html += `
+                    <tr>
+                        <td class="name">${s.lastName} ${s.firstName[0]}.</td>
+                        <td class="rank">${s.rank}</td>
+                        ${cells}
+                        <td class="total">${s.totalDuty}</td>
+                        <td class="total">${s.totalCleaning}</td>
+                    </tr>
+                `;
+            }
+
+            html += `</tbody></table></div>`;
+        }
+
+        document.getElementById('content').innerHTML = html || '<div class="loading">Немає даних</div>';
+    }
+
+    load();
+</script>
+
+</body>
+</html>
