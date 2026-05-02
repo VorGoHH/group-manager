@@ -10,4 +10,6 @@ import java.util.List;
 public interface AbsenceRepository extends JpaRepository<Absence, Long> {
     List<Absence> findByAbsenceDate(LocalDate date);
     boolean existsBySoldierIdAndAbsenceDate(Long soldierId, LocalDate date);
+
+    List<Absence> findBySoldierIdOrderByAbsenceDateDesc(Long soldierId);
 }

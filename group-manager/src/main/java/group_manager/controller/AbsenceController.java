@@ -75,6 +75,10 @@ public class AbsenceController {
                 .findFirst()
                 .ifPresent(absenceRepository::delete);
     }
+    @GetMapping("/{soldierId}/history")
+    public List<Absence> getAbsenceHistory(@PathVariable Long soldierId) {
+        return absenceRepository.findBySoldierIdOrderByAbsenceDateDesc(soldierId);
+    }
 
     record AbsenceRequest(Long soldierId, LocalDate date,
                           AbsenceReason reason, String note) {}

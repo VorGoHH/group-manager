@@ -3,74 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Наряди — 241 група</title>
+    <title>Наряди — 241 н.г.</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial, sans-serif; background: #f0f2f5; color: #333; }
-        .header { background: #1a3a5c; color: white; padding: 16px 24px;
-                  display: flex; justify-content: space-between; align-items: center; }
-        .header h1 { font-size: 20px; }
-        .nav { display: flex; gap: 16px; }
-        .nav a { color: white; text-decoration: none; opacity: 0.7; font-size: 14px; }
-        .nav a:hover { opacity: 1; }
-        .container { max-width: 800px; margin: 24px auto; padding: 0 16px; }
-        .controls { background: white; border-radius: 8px; padding: 20px;
-                    box-shadow: 0 1px 4px rgba(0,0,0,0.1); margin-bottom: 20px;
-                    display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-        .controls input[type=date] { padding: 8px 12px; border: 1px solid #ddd;
-                                      border-radius: 4px; font-size: 14px; }
-        .btn { padding: 8px 16px; border: none; border-radius: 4px;
-               cursor: pointer; font-size: 14px; }
-        .btn-primary { background: #1a3a5c; color: white; }
-        .btn-primary:hover { background: #15304d; }
-        .btn-danger { background: #c62828; color: white; }
-        .btn-danger:hover { background: #b71c1c; }
-        .btn-secondary { background: #f5f5f5; color: #333; border: 1px solid #ddd; }
-        .btn-secondary:hover { border-color: #1a3a5c; color: #1a3a5c; }
-        .section { background: white; border-radius: 8px; padding: 20px;
-                   box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
-        .section h2 { font-size: 16px; margin-bottom: 16px;
-                      padding-bottom: 8px; border-bottom: 2px solid #e0e0e0; }
-        .duty-item { display: flex; align-items: center; padding: 12px;
-                     border-bottom: 1px solid #f0f0f0; gap: 12px; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #1a1a2e; color: #e0e0e0; min-height: 100vh; }
+
+        nav { background: #16213e; padding: 12px 24px; display: flex; gap: 16px; align-items: center; border-bottom: 1px solid #0f3460; }
+        nav a { color: #a0a0c0; text-decoration: none; font-size: 14px; padding: 6px 12px; border-radius: 6px; transition: background 0.2s; }
+        nav a:hover { background: #0f3460; color: #e0e0e0; }
+        nav a.active { background: #0f3460; color: #fff; }
+
+        .container { max-width: 860px; margin: 32px auto; padding: 0 16px; }
+
+        .controls { background: #16213e; border-radius: 10px; padding: 16px 20px; margin-bottom: 20px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+
+        .controls input[type=date] { padding: 8px 12px; background: #1e2d4a; border: 1px solid #2a3a5a; border-radius: 6px; font-size: 14px; color: #e0e0e0; }
+        .controls input[type=date]::-webkit-calendar-picker-indicator { filter: invert(0.7); }
+
+        .btn { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.15s; }
+        .btn-secondary { background: #1e2d4a; color: #a0b0d0; border: 1px solid #2a3a5a; }
+        .btn-secondary:hover { border-color: #5b9bd5; color: #5b9bd5; }
+        .btn-primary { background: #1e3a5a; color: #5b9bd5; }
+        .btn-primary:hover { background: #254d7a; }
+        .btn-danger { background: #3a1e1e; color: #cf6060; }
+        .btn-danger:hover { background: #4a2a2a; }
+
+        .section { background: #16213e; border-radius: 10px; padding: 20px; }
+        .section-title { font-size: 13px; font-weight: 600; color: #7080a0; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid #1e2d4a; }
+
+        .duty-item { display: flex; align-items: center; padding: 12px 4px; border-bottom: 1px solid #1e2d4a; gap: 12px; }
         .duty-item:last-child { border-bottom: none; }
-        .role-badge { font-size: 12px; padding: 3px 10px; border-radius: 12px;
-                      font-weight: 500; min-width: 120px; text-align: center; }
-        .role-1 { background: #fff3e0; color: #e65100; }
-        .role-2 { background: #e8f5e9; color: #2e7d32; }
-        .role-3 { background: #e3f2fd; color: #1565c0; }
-        .role-4 { background: #f3e5f5; color: #6a1b9a; }
-        .soldier-name { font-weight: 500; font-size: 15px; }
-        .soldier-rank { font-size: 12px; color: #666; margin-top: 2px; }
-        .empty-state { text-align: center; padding: 40px; color: #999; }
-        .error-msg { background: #ffebee; color: #c62828; padding: 12px;
-                     border-radius: 4px; margin-bottom: 12px; font-size: 14px; }
-        .success-msg { background: #e8f5e9; color: #2e7d32; padding: 12px;
-                       border-radius: 4px; margin-bottom: 12px; font-size: 14px; }
-        .btn-icon { padding: 6px 10px; font-size: 14px; border: 1px solid #ddd;
-                    background: #f5f5f5; border-radius: 4px; cursor: pointer; }
-        .btn-icon:hover { border-color: #1a3a5c; }
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0;
-                         width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 100; }
-        .modal { background: white; border-radius: 8px; padding: 24px;
-                 width: 420px; margin: 10% auto; }
-        .modal h3 { margin-bottom: 8px; }
-        .candidate-item { display: flex; justify-content: space-between; align-items: center;
-                          padding: 10px 12px; border-bottom: 1px solid #f0f0f0; cursor: pointer; }
-        .candidate-item:hover { background: #f5f8ff; }
+
+        .role-badge { font-size: 12px; padding: 4px 12px; border-radius: 10px; font-weight: 500; min-width: 130px; text-align: center; white-space: nowrap; }
+        .role-1 { background: #3a2a1a; color: #d5955b; }
+        .role-2 { background: #1a3a2a; color: #4caf75; }
+        .role-3 { background: #1a2a3a; color: #5b9bd5; }
+        .role-4 { background: #2a1a3a; color: #a06ad5; }
+
+        .soldier-name { font-weight: 500; font-size: 15px; color: #fff; }
+        .soldier-meta { font-size: 12px; color: #7080a0; margin-top: 2px; }
+        .manual-tag { font-size: 11px; color: #4a5a7a; margin-left: 6px; }
+
+        .btn-icon { padding: 6px 10px; font-size: 14px; background: #1e2d4a; border: 1px solid #2a3a5a; border-radius: 6px; cursor: pointer; transition: border-color 0.15s; }
+        .btn-icon:hover { border-color: #5b9bd5; }
+
+        .empty-state { text-align: center; padding: 40px; color: #3a4a6a; font-size: 14px; }
+
+        .msg { padding: 10px 14px; border-radius: 6px; margin-bottom: 12px; font-size: 14px; }
+        .msg.error { background: #3a1e1e; color: #cf6060; }
+        .msg.success { background: #1e3a2a; color: #4caf75; }
+
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 100; }
+        .modal { background: #16213e; border: 1px solid #0f3460; border-radius: 12px; padding: 24px; width: 420px; margin: 10% auto; }
+        .modal h3 { font-size: 16px; color: #fff; margin-bottom: 6px; }
+        .modal-sub { font-size: 13px; color: #7080a0; margin-bottom: 14px; }
+        .modal-sub strong { color: #a0b0d0; }
+
+        .candidate-list { max-height: 300px; overflow-y: auto; border: 1px solid #1e2d4a; border-radius: 8px; }
+        .candidate-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-bottom: 1px solid #1e2d4a; cursor: pointer; transition: background 0.15s; }
+        .candidate-item:hover { background: #1e2d4a; }
         .candidate-item:last-child { border-bottom: none; }
+        .candidate-name { font-size: 14px; font-weight: 500; color: #fff; }
+        .candidate-meta { font-size: 12px; color: #7080a0; margin-top: 2px; }
+
+        .modal-footer { margin-top: 14px; text-align: right; }
     </style>
 </head>
 <body>
 
-<div class="header">
-    <h1>Наряди — 241 навчальна група</h1>
-    <nav class="nav">
-        <a href="/cleaning.html">Прибирання</a>
-        <a href="/">Розхід</a>
-        <a href="/duties.html">Наряди</a>
-    </nav>
-</div>
+<nav>
+    <a href="/">Розхід</a>
+    <a href="/duties.html" class="active">Наряди</a>
+    <a href="/cleaning.html">Прибирання</a>
+    <a href="/stats.html">Статистика</a>
+</nav>
 
 <div class="container">
     <div class="controls">
@@ -84,23 +90,19 @@
     <div id="messageBox"></div>
 
     <div class="section">
-        <h2 id="sectionTitle">Оберіть дату</h2>
+        <div class="section-title" id="sectionTitle">Оберіть дату</div>
         <div id="dutyList">
             <div class="empty-state">Оберіть дату і натисніть "Переглянути"</div>
         </div>
     </div>
 </div>
 
-<!-- Модальне вікно вибору -->
 <div class="modal-overlay" id="replaceModal">
     <div class="modal">
         <h3>Замінити — <span id="replaceRoleName"></span></h3>
-        <p style="font-size:13px;color:#666;margin-bottom:12px">
-            Зараз: <strong id="replaceCurrentName"></strong>
-        </p>
-        <div id="candidatesList" style="max-height:300px;overflow-y:auto;
-             border:1px solid #eee;border-radius:4px;"></div>
-        <div style="margin-top:12px;text-align:right">
+        <p class="modal-sub">Зараз: <strong id="replaceCurrentName"></strong></p>
+        <div class="candidate-list" id="candidatesList"></div>
+        <div class="modal-footer">
             <button class="btn btn-secondary" onclick="closeReplaceModal()">Скасувати</button>
         </div>
     </div>
@@ -115,7 +117,7 @@
 
     function showMessage(text, isError) {
         const box = document.getElementById('messageBox');
-        box.innerHTML = `<div class="${isError ? 'error-msg' : 'success-msg'}">${text}</div>`;
+        box.innerHTML = `<div class="msg ${isError ? 'error' : 'success'}">${text}</div>`;
         setTimeout(() => box.innerHTML = '', 4000);
     }
 
@@ -126,15 +128,13 @@
         const res = await fetch(`/api/duties?date=${date}`);
         const duties = await res.json();
 
-        const title = document.getElementById('sectionTitle');
-        const list = document.getElementById('dutyList');
-
         const formatted = new Date(date + 'T00:00:00')
-            .toLocaleDateString('uk-UA', {day:'numeric', month:'long', year:'numeric'});
-        title.textContent = `Наряд на ${formatted}`;
+            .toLocaleDateString('uk-UA', {day: 'numeric', month: 'long', year: 'numeric'});
+        document.getElementById('sectionTitle').textContent = `Наряд на ${formatted}`;
 
+        const list = document.getElementById('dutyList');
         if (duties.length === 0) {
-            list.innerHTML = '<div class="empty-state">Наряд не знайдено. Натисніть "Згенерувати наряд"</div>';
+            list.innerHTML = '<div class="empty-state">Наряд не знайдено. Натисніть "Звичайний наряд" або "Наряд з ПУ"</div>';
             return;
         }
 
@@ -144,9 +144,9 @@
                 <div style="flex:1">
                     <div class="soldier-name">
                         ${d.soldier.lastName} ${d.soldier.firstName} ${d.soldier.middleName}
-                        ${d.isManual ? '<span style="font-size:11px;color:#999"> (змінено вручну)</span>' : ''}
+                        ${d.isManual ? '<span class="manual-tag">(змінено вручну)</span>' : ''}
                     </div>
-                    <div class="soldier-rank">${d.soldier.rank} · ${d.soldier.platoon} відділення</div>
+                    <div class="soldier-meta">${d.soldier.rank} · ${d.soldier.platoon} відділення</div>
                 </div>
                 <div style="display:flex;gap:6px">
                     <button class="btn-icon" title="Вибрати вручну"
@@ -160,15 +160,9 @@
     async function generateDuty(type) {
         const date = document.getElementById('dateInput').value;
         if (!date) { showMessage('Оберіть дату', true); return; }
-
         const res = await fetch(`/api/duties/generate?date=${date}&type=${type}`, { method: 'POST' });
-        if (res.ok) {
-            showMessage('Наряд успішно згенеровано!', false);
-            loadDuty();
-        } else {
-            const text = await res.text();
-            showMessage(text, true);
-        }
+        if (res.ok) { showMessage('Наряд успішно згенеровано!', false); loadDuty(); }
+        else { showMessage(await res.text(), true); }
     }
 
     async function deleteDuty() {
@@ -180,7 +174,6 @@
         loadDuty();
     }
 
-    // Відкрити модалку з вибором кандидата
     async function openReplaceModal(dutyId, currentName, roleName) {
         currentDutyId = dutyId;
         document.getElementById('replaceRoleName').textContent = roleName;
@@ -191,13 +184,13 @@
 
         const list = document.getElementById('candidatesList');
         if (candidates.length === 0) {
-            list.innerHTML = '<div style="padding:16px;text-align:center;color:#999">Немає доступних кандидатів</div>';
+            list.innerHTML = '<div style="padding:16px;text-align:center;color:#4a5a7a">Немає доступних кандидатів</div>';
         } else {
             list.innerHTML = candidates.map(s => `
                 <div class="candidate-item" onclick="confirmReplace(${s.id})">
                     <div>
-                        <div style="font-size:14px;font-weight:500">${s.lastName} ${s.firstName} ${s.middleName}</div>
-                        <div style="font-size:12px;color:#666">${s.rank} · ${s.platoon} відділення</div>
+                        <div class="candidate-name">${s.lastName} ${s.firstName} ${s.middleName}</div>
+                        <div class="candidate-meta">${s.rank} · ${s.platoon} відділення</div>
                     </div>
                 </div>`).join('');
         }
@@ -216,15 +209,10 @@
         currentDutyId = null;
     }
 
-    // Замінити випадково
     async function replaceRandom(dutyId) {
         const res = await fetch(`/api/duties/${dutyId}/replace`, { method: 'PUT' });
-        if (res.ok) {
-            loadDuty();
-        } else {
-            const text = await res.text();
-            showMessage(text, true);
-        }
+        if (res.ok) loadDuty();
+        else showMessage(await res.text(), true);
     }
 
     loadDuty();

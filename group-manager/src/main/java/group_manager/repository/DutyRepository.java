@@ -8,16 +8,20 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface DutyRepository extends JpaRepository<Duty, Long> {
     List<Duty> findByDutyDate(LocalDate date);
     long countBySoldierAndRole(Soldier soldier, DutyRole role);
-
-    // Загальна кількість нарядів по солдату
     long countBySoldier(Soldier soldier);
 
-    // Кількість нарядів по солдату в кожній ролі
+    // Для статистики — розбивка по ролях
     @Query("SELECT d.role.name, COUNT(d) FROM Duty d WHERE d.soldier = :soldier GROUP BY d.role.name")
     List<Object[]> countByRoleForSoldier(Soldier soldier);
+
+    // Для видалення останнього запису
+    Optional<Duty> findTopBySoldierAndRoleOrderByIdDesc(Soldier soldier, DutyRole role);
+
+    List<Duty> findBySoldier(Soldier soldier);
 }
