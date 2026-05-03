@@ -95,8 +95,12 @@ public class CleaningService {
 
     private List<Soldier> pickLeast(List<Soldier> candidates, int count) {
         return candidates.stream()
-                .sorted(Comparator.comparingLong(s ->
-                        cleaningRepository.countBySoldier(s)))
+                .sorted(Comparator.comparingLong((Soldier s) ->
+                                cleaningRepository.countBySoldier(s))
+                        .thenComparing(s -> cleaningRepository
+                                .findTopBySoldierOrderByIdDesc(s)
+                                .map(c -> c.getCleaningDate())
+                                .orElse(LocalDate.of(2000, 1, 1))))
                 .limit(count)
                 .collect(Collectors.toList());
     }

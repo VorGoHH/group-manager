@@ -155,8 +155,12 @@ public class DutyService {
     private Soldier pickLeast(List<Soldier> candidates, DutyRole role) {
         if (candidates.isEmpty()) return null;
         return candidates.stream()
-                .min(Comparator.comparingLong(s ->
-                        dutyRepository.countBySoldierAndRole(s, role)))
+                .min(Comparator.comparingLong((Soldier s) ->
+                                dutyRepository.countBySoldierAndRole(s, role))
+                        .thenComparing(s -> dutyRepository
+                                .findTopBySoldierAndRoleOrderByIdDesc(s, role)
+                                .map(d -> d.getDutyDate())
+                                .orElse(LocalDate.of(2000, 1, 1))))
                 .orElse(null);
     }
 
