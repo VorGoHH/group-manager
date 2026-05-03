@@ -85,6 +85,7 @@
         <button class="btn btn-primary" onclick="generateDuty('NORMAL')">+ Звичайний наряд</button>
         <button class="btn btn-primary" onclick="generateDuty('WITH_PU')">+ Наряд з ПУ</button>
         <button class="btn btn-danger" onclick="deleteDuty()">Видалити</button>
+        <button class="btn btn-secondary" onclick="sendDutyReport()">📤 Telegram</button>
     </div>
 
     <div id="messageBox"></div>
@@ -214,7 +215,20 @@
         if (res.ok) loadDuty();
         else showMessage(await res.text(), true);
     }
-
+async function sendDutyReport() {
+    const date = document.getElementById('dateInput').value;
+    if (!date) { showMessage('Оберіть дату', true); return; }
+    const btn = event.target;
+    btn.textContent = '⏳';
+    btn.disabled = true;
+    try {
+        const res = await fetch(`/api/duties/report/send?date=${date}`, { method: 'POST' });
+        showMessage(res.ok ? 'Надіслано в Telegram!' : await res.text(), !res.ok);
+    } catch {
+        showMessage('Помилка відправки', true);
+    }
+    setTimeout(() => { btn.textContent = '📤 Telegram'; btn.disabled = false; }, 3000);
+}
     loadDuty();
 </script>
 </body>
