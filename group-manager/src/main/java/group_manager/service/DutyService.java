@@ -157,9 +157,11 @@ public class DutyService {
         return candidates.stream()
                 .min(Comparator.comparingLong((Soldier s) ->
                                 dutyRepository.countBySoldierAndRole(s, role))
-                        .thenComparing(s -> dutyRepository
-                                .findTopBySoldierAndRoleOrderByIdDesc(s, role)
-                                .map(d -> d.getDutyDate())
+                        .thenComparing(s -> dutyRepository.findBySoldier(s).stream()
+                                .filter(d -> d.getRole().getId().equals(role.getId()))
+                                .filter(d -> !d.getDutyDate().equals(LocalDate.of(1970, 1, 1)))
+                                .map(Duty::getDutyDate)
+                                .max(Comparator.naturalOrder())
                                 .orElse(LocalDate.of(2000, 1, 1))))
                 .orElse(null);
     }
