@@ -71,7 +71,7 @@ public class ReportService {
                         String last = s.getLastName();
                         String fi = s.getFirstName().substring(0, 1) + "." +
                                 s.getMiddleName().substring(0, 1) + ".";
-                        return last + " " + fi;
+                        return s.getRank() + " " + last + " " + fi;
                     })
                     .collect(Collectors.joining(", "));
 
