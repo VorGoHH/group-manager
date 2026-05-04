@@ -35,7 +35,7 @@ public class DataInitializer implements CommandLineRunner {
         // 1 відділення
         save("Кіндратяк",    "Вадим",     "Вікторович",    "молодший сержант", 1, true,  false);
         save("Богаченко",    "Павло",     "Іванович",      "старший солдат",   1, false, false);
-        save("Демченок",     "Дмитро",    "Романович",     "солдат",           1, false, false);
+        save("Демченко",     "Дмитро",    "Романович",     "солдат",           1, false, false);
         save("Корчинський",  "Володимир", "В'ячеславович", "солдат",           1, false, false);
         save("Кравченко",    "Дмитро",    "Вікторович",    "солдат",           1, false, false);
         save("Марченко",     "Андрій",    "Миколайович",   "солдат",           1, false, false);
@@ -60,7 +60,7 @@ public class DataInitializer implements CommandLineRunner {
         save("Снігир",       "Артем",     "Миколайович",   "солдат",           3, false, false);
         save("Харченко",     "Ярослав",   "Павлович",      "солдат",           3, false, false);
 
-        System.out.println(">>> Дані успішно завантажені!");
+        System.out.println(">>> Дані узавантажені");
     }
 
     private void save(String lastName, String firstName, String middleName,
