@@ -154,15 +154,25 @@ public class DutyService {
     // Вибрати того хто найменше разів чергував у цій ролі
     private Soldier pickLeast(List<Soldier> candidates, DutyRole role) {
         if (candidates.isEmpty()) return null;
-        return candidates.stream()
-                .min(Comparator.comparingLong((Soldier s) ->
-                                dutyRepository.countBySoldierAndRole(s, role))
-                        .thenComparing(s -> dutyRepository.findBySoldier(s).stream()
-                                .filter(d -> d.getRole().getId().equals(role.getId()))
-                                .filter(d -> !d.getDutyDate().equals(LocalDate.of(1970, 1, 1)))
-                                .map(Duty::getDutyDate)
-                                .max(Comparator.naturalOrder())
-                                .orElse(LocalDate.of(2000, 1, 1))))
+
+        // 1. Мінімальна загальна кількість нарядів
+        long minCount = candidates.stream()
+                .mapToLong(s -> dutyRepository.countBySoldier(s))
+                .min()
+                .orElse(0);
+
+        // 2. Ті хто має мінімум
+        List<Soldier> leastUsed = candidates.stream()
+                .filter(s -> dutyRepository.countBySoldier(s) == minCount)
+                .collect(Collectors.toList());
+
+        // 3. З них — хто найдавніше взагалі чергував
+        return leastUsed.stream()
+                .min(Comparator.comparing(s -> dutyRepository.findBySoldier(s).stream()
+                        .filter(d -> !d.getDutyDate().equals(LocalDate.of(1970, 1, 1)))
+                        .map(Duty::getDutyDate)
+                        .max(Comparator.naturalOrder())
+                        .orElse(LocalDate.of(2000, 1, 1))))
                 .orElse(null);
     }
 
