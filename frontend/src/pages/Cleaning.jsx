@@ -8,6 +8,7 @@ export default function Cleaning() {
   const [toast, setToast] = useState(null)
   const [replaceModal, setReplaceModal] = useState(null)
   const [candidates, setCandidates] = useState([])
+  const [sending, setSending] = useState(false)
 
   const showToast = (msg, ok = true) => {
     setToast({ msg, ok })
@@ -47,6 +48,16 @@ export default function Cleaning() {
     setReplaceModal(null)
     load(currentDate)
   }
+const sendReport = async () => {
+  setSending(true)
+  try {
+    const res = await fetch(`/api/cleaning/report/send?date=${currentDate}`, { method: 'POST' })
+    showToast(res.ok ? '✅ Надіслано в Telegram' : '❌ Помилка відправки', res.ok)
+  } catch {
+    showToast('❌ Помилка відправки', false)
+  }
+  setSending(false)
+}
 
   const byPlatoon = [1, 2, 3].map(p => ({
     platoon: p,
@@ -64,6 +75,9 @@ export default function Cleaning() {
         />
         <button className="btn btn-primary" onClick={generate}>+ Згенерувати</button>
         <button className="btn btn-danger" onClick={deleteCleaning}>Видалити</button>
+        <button className="btn btn-tg" onClick={sendReport} disabled={sending}>
+          {sending ? '⏳' : '📤'} <span className="btn-label">Telegram</span>
+        </button>
       </div>
 
       <section className="card">
