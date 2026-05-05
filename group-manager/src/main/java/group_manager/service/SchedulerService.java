@@ -23,7 +23,7 @@ public class SchedulerService {
         this.telegramService = telegramService;
     }
 
-    @Scheduled(cron = "0 00 20 * * *")
+    @Scheduled(cron = "0 0 20 * * *")
     public void scheduleCleaningAndNotify() throws Exception {
         LocalDate tomorrow = LocalDate.now().plusDays(1);
 

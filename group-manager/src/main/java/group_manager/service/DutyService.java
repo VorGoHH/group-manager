@@ -4,6 +4,8 @@ import group_manager.entity.*;
 import group_manager.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import group_manager.entity.AbsenceReason;
+import group_manager.entity.Absence;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -98,7 +100,9 @@ public class DutyService {
             }
         }
 
-        return dutyRepository.saveAll(result);
+        List<Duty> saved = dutyRepository.saveAll(result);
+        saved.forEach(d -> createOnDutyAbsence(d.getSoldier(), date));
+        return saved;
     }
 
     public Duty replaceSoldier(Long dutyId) {
@@ -145,10 +149,14 @@ public class DutyService {
             throw new RuntimeException("Немає доступних кандидатів для заміни");
         }
 
+        Soldier oldSoldier = duty.getSoldier();
         Soldier newSoldier = pickLeast(candidates, role);
         duty.setSoldier(newSoldier);
         duty.setIsManual(true);
-        return dutyRepository.save(duty);
+        Duty saved = dutyRepository.save(duty);
+        removeOnDutyAbsence(oldSoldier, date);
+        createOnDutyAbsence(newSoldier, date);
+        return saved;
     }
 
     // Вибрати того хто найменше разів чергував у цій ролі
@@ -237,14 +245,38 @@ public class DutyService {
     public Duty replaceSoldierWith(Long dutyId, Long soldierId) {
         Duty duty = dutyRepository.findById(dutyId)
                 .orElseThrow(() -> new RuntimeException("Наряд не знайдено"));
-        Soldier soldier = soldierRepository.findById(soldierId)
+        Soldier newSoldier = soldierRepository.findById(soldierId)
                 .orElseThrow(() -> new RuntimeException("Солдата не знайдено"));
-        duty.setSoldier(soldier);
+        Soldier oldSoldier = duty.getSoldier();
+        duty.setSoldier(newSoldier);
         duty.setIsManual(true);
-        return dutyRepository.save(duty);
+        Duty saved = dutyRepository.save(duty);
+        removeOnDutyAbsence(oldSoldier, duty.getDutyDate());
+        createOnDutyAbsence(newSoldier, duty.getDutyDate());
+        return saved;
     }
 
     public void deleteDuty(LocalDate date) {
-        dutyRepository.deleteAll(dutyRepository.findByDutyDate(date));
+        List<Duty> duties = dutyRepository.findByDutyDate(date);
+        duties.forEach(d -> removeOnDutyAbsence(d.getSoldier(), date));
+        dutyRepository.deleteAll(duties);
+    }
+
+    private void createOnDutyAbsence(Soldier soldier, LocalDate date) {
+        if (!absenceRepository.existsBySoldierIdAndAbsenceDate(soldier.getId(), date)) {
+            Absence absence = new Absence();
+            absence.setSoldier(soldier);
+            absence.setAbsenceDate(date);
+            absence.setReason(AbsenceReason.ON_DUTY);
+            absence.setNote("Наряд");
+            absenceRepository.save(absence);
+        }
+    }
+
+    private void removeOnDutyAbsence(Soldier soldier, LocalDate date) {
+        absenceRepository.findByAbsenceDate(date).stream()
+                .filter(a -> a.getSoldier().getId().equals(soldier.getId()))
+                .filter(a -> AbsenceReason.ON_DUTY.equals(a.getReason()))
+                .forEach(absenceRepository::delete);
     }
 }
