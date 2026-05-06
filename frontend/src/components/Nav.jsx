@@ -9,6 +9,7 @@ export default function Nav() {
         <NavLink to="/duties" className={({isActive}) => 'nav-link' + (isActive ? ' active' : '')}>Наряди</NavLink>
         <NavLink to="/cleaning" className={({isActive}) => 'nav-link' + (isActive ? ' active' : '')}>Прибирання</NavLink>
         <NavLink to="/stats" className={({isActive}) => 'nav-link' + (isActive ? ' active' : '')}>Статистика</NavLink>
+        <NavLink to="/work" className={({isActive}) => 'nav-link' + (isActive ? ' active' : '')}>Роботи</NavLink>
       </div>
     </nav>
   )

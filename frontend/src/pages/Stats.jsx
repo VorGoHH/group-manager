@@ -30,6 +30,7 @@ export default function Stats() {
       ROLES.forEach(r => { v[`duty-${s.id}-${r}`] = s.dutyByRole[r] || 0 })
       v[`clean-${s.id}`] = s.totalCleaning || 0
       v[`total-${s.id}`] = s.totalDuty || 0
+      v[`work-${s.id}`] = s.totalWork || 0
     })
     setVals(v)
   }
@@ -101,6 +102,7 @@ export default function Stats() {
                   {ROLES.map(r => <th key={r}>{ROLE_SHORT[r]}</th>)}
                   <th>Всього</th>
                   <th>Прибирань</th>
+                  <th>Роботи</th>
                 </tr>
               </thead>
               <tbody>
@@ -138,6 +140,17 @@ export default function Stats() {
                         <span className={(vals[`clean-${s.id}`] ?? 0) === 0 ? 'zero' : ''}>{vals[`clean-${s.id}`] ?? 0}</span>
                       )}
                     </td>
+                    <td className="num-cell">
+                      {editMode ? (
+                        <div className="counter">
+                          <button className="btn-adj minus" disabled={(vals[`work-${s.id}`] ?? 0) === 0} onClick={() => adjustWork(s.id, -1)}>−</button>
+                          <span className={(vals[`work-${s.id}`] ?? 0) === 0 ? 'zero' : ''}>{vals[`work-${s.id}`] ?? 0}</span>
+                          <button className="btn-adj plus" onClick={() => adjustWork(s.id, 1)}>+</button>
+                        </div>
+                      ) : (
+                        <span className={(vals[`work-${s.id}`] ?? 0) === 0 ? 'zero' : ''}>{vals[`work-${s.id}`] ?? 0}</span>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -154,6 +167,7 @@ export default function Stats() {
               <button className="modal-close" onClick={() => setHistory(null)}>✕</button>
             </div>
             <div className="modal-tabs">
+                <button className={`tab-btn ${historyTab === 'works' ? 'active' : ''}`} onClick={() => setHistoryTab('works')}>Роботи</button>
               <button className={`tab-btn ${historyTab === 'duties' ? 'active' : ''}`} onClick={() => setHistoryTab('duties')}>Наряди</button>
               <button className={`tab-btn ${historyTab === 'cleanings' ? 'active' : ''}`} onClick={() => setHistoryTab('cleanings')}>Прибирання</button>
             </div>
@@ -167,14 +181,23 @@ export default function Stats() {
                       <span>{d.role}{d.isManual && <span className="manual-tag"> (вручну)</span>}</span>
                     </div>
                   ))
-                : history.data.cleanings?.length === 0
-                  ? <div className="empty">Немає записів</div>
-                  : history.data.cleanings?.map((c, i) => (
-                    <div key={i} className="history-row">
-                      <span className="history-date">{formatDate(c.date)}</span>
-                      <span>{c.territory}{c.isManual && <span className="manual-tag"> (вручну)</span>}</span>
-                    </div>
-                  ))
+                : historyTab === 'cleanings'
+                  ? history.data.cleanings?.length === 0
+                    ? <div className="empty">Немає записів</div>
+                    : history.data.cleanings?.map((c, i) => (
+                      <div key={i} className="history-row">
+                        <span className="history-date">{formatDate(c.date)}</span>
+                        <span>{c.territory}{c.isManual && <span className="manual-tag"> (вручну)</span>}</span>
+                      </div>
+                    ))
+                  : history.data.works?.length === 0
+                    ? <div className="empty">Немає записів</div>
+                    : history.data.works?.map((w, i) => (
+                      <div key={i} className="history-row">
+                        <span className="history-date">{formatDate(w.date)}</span>
+                        <span>{w.workName}{w.isManual && <span className="manual-tag"> (вручну)</span>}</span>
+                      </div>
+                    ))
               }
             </div>
           </div>

@@ -6,6 +6,7 @@ import Duties from './pages/Duties'
 import Cleaning from './pages/Cleaning'
 import Stats from './pages/Stats'
 import './App.css'
+import Work from './pages/Work'
 
 const pageVariants = {
   initial: { opacity: 0, y: 16 },
@@ -29,6 +30,7 @@ function AnimatedRoutes() {
           <Route path="/duties" element={<Duties />} />
           <Route path="/cleaning" element={<Cleaning />} />
           <Route path="/stats" element={<Stats />} />
+          <Route path="/work" element={<Work />} />
         </Routes>
       </motion.div>
     </AnimatePresence>

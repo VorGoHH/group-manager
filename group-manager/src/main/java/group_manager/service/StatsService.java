@@ -4,10 +4,7 @@ import group_manager.entity.Cleaning;
 import group_manager.entity.Duty;
 import group_manager.entity.DutyRole;
 import group_manager.entity.Soldier;
-import group_manager.repository.CleaningRepository;
-import group_manager.repository.DutyRepository;
-import group_manager.repository.DutyRoleRepository;
-import group_manager.repository.SoldierRepository;
+import group_manager.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +19,7 @@ public class StatsService {
     private final DutyRepository dutyRepository;
     private final CleaningRepository cleaningRepository;
     private final DutyRoleRepository dutyRoleRepository;
+    private final WorkAssignmentRepository workAssignmentRepository;
 
     // Технічна дата для ручних коригувань
     private static final LocalDate MANUAL_DATE = LocalDate.of(1970, 1, 1);
@@ -57,6 +55,7 @@ public class StatsService {
             row.put("dutyByRole", dutyByRole);
             row.put("totalDuty", totalDuty);
             row.put("totalCleaning", cleaningRepository.countBySoldier(s));
+            row.put("totalWork", workAssignmentRepository.countBySoldier(s));
 
             result.add(row);
         }
@@ -143,10 +142,23 @@ public class StatsService {
                     return row;
                 }).toList();
 
+        List<Map<String, Object>> works = workAssignmentRepository.findBySoldier(soldier).stream()
+                .sorted(Comparator.comparing(group_manager.entity.WorkAssignment::getWorkDate).reversed())
+                .map(w -> {
+                    Map<String, Object> row = new LinkedHashMap<>();
+                    row.put("date", w.getWorkDate());
+                    row.put("workName", w.getWorkName());
+                    row.put("isManual", w.getIsManual());
+                    return row;
+                }).toList();
+
+
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("soldier", soldier.getLastName() + " " + soldier.getFirstName());
         result.put("duties", duties);
         result.put("cleanings", cleanings);
+        result.put("works", works);
         return result;
+
     }
 }
