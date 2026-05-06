@@ -45,11 +45,20 @@ public class DutyService {
         Set<Long> assigned = new HashSet<>();
 
         boolean withPu = "WITH_PU".equals(type);
+        List<String> commanderLastNames = List.of("Вашуленко", "Бондаренко", "Кіндратяк", "Рязанов");
+        List<String> assistantLastNames = List.of("Богаченко", "Лобач", "Радківський", "Ходоровський");
+        List<String> dutyOnlyLastNames = List.of("Базелюк", "Вітвіцький", "Демченко", "Зубаков", "Кінах",
+                "Корчинський", "Кравченко", "Кульбако", "Марченко", "Милетич",
+                "Мясоєдов", "Снігир", "Сехін", "Тимашов", "Харченко");
+        List<String> messLastNames = List.of("Базелюк", "Богаченко", "Вітвіцький", "Демченко", "Зубаков",
+                "Кінах", "Корчинський", "Кравченко", "Кульбако", "Лобач", "Марченко", "Милетич",
+                "Мясоєдов", "Радківський", "Снігир", "Сехін", "Тимашов", "Харченко", "Ходоровський");
+
 
         if (withPu) {
             // Черговий ПУ
             List<Soldier> commanders = allPresent.stream()
-                    .filter(Soldier::getIsCommander)
+                    .filter(s -> commanderLastNames.contains(s.getLastName()))
                     .toList();
             Soldier commander = pickLeast(commanders, roleCommander);
             if (commander != null) {
@@ -58,7 +67,6 @@ public class DutyService {
             }
 
             // Помічник ЧПУ
-            List<String> assistantLastNames = List.of("Радківський", "Ходоровський", "Богаченко");
             List<Soldier> assistants = allPresent.stream()
                     .filter(s -> assistantLastNames.contains(s.getLastName()))
                     .filter(s -> !assigned.contains(s.getId()))
@@ -70,35 +78,43 @@ public class DutyService {
             }
         }
 
+        // Днювальні
+        List<Soldier> dutyPool = allPresent.stream()
+                .filter(s -> dutyOnlyLastNames.contains(s.getLastName()))
+                .filter(s -> !assigned.contains(s.getId()))
+                .collect(Collectors.toCollection(ArrayList::new));
+
+        for (int i = 0; i < 2; i++) {
+            Soldier picked = pickLeast(dutyPool, roleDuty);
+            if (picked != null) {
+                result.add(createDuty(date, picked, roleDuty, type));
+                assigned.add(picked.getId());
+                dutyPool.remove(picked);
+            }
+        }
+
+        // Їдальня
+        int messCount = withPu ? 2 : 1;
+        List<Soldier> messPool = allPresent.stream()
+                .filter(s -> messLastNames.contains(s.getLastName()))
+                .filter(s -> !assigned.contains(s.getId()))
+                .collect(Collectors.toCollection(ArrayList::new));
+
+        for (int i = 0; i < messCount; i++) {
+            Soldier mess = pickLeast(messPool, roleMess);
+            if (mess != null) {
+                result.add(createDuty(date, mess, roleMess, type));
+                assigned.add(mess.getId());
+                messPool.remove(mess);
+            }
+        }
+
         // Рядові для днювальних та їдальні
         List<Soldier> regular = allPresent.stream()
                 .filter(s -> !s.getIsCommander())
                 .filter(s -> !Boolean.TRUE.equals(s.getExcludeFromDuty()))
                 .filter(s -> !assigned.contains(s.getId()))
                 .collect(Collectors.toCollection(ArrayList::new));
-
-        // Два днювальних
-        for (int i = 0; i < 2; i++) {
-            Soldier picked = pickLeast(regular, roleDuty);
-            if (picked != null) {
-                result.add(createDuty(date, picked, roleDuty, type));
-                assigned.add(picked.getId());
-                regular.remove(picked);
-            }
-        }
-
-        // Їдальня — 1 якщо звичайний, 2 якщо з ПУ
-        int messCount = withPu ? 2 : 1;
-        for (int i = 0; i < messCount; i++) {
-            List<Soldier> messPool = regular.stream()
-                    .filter(s -> !assigned.contains(s.getId()))
-                    .collect(Collectors.toCollection(ArrayList::new));
-            Soldier mess = pickLeast(messPool, roleMess);
-            if (mess != null) {
-                result.add(createDuty(date, mess, roleMess, type));
-                assigned.add(mess.getId());
-            }
-        }
 
         List<Duty> saved = dutyRepository.saveAll(result);
         saved.forEach(d -> createOnDutyAbsence(d.getSoldier(), date));
@@ -130,7 +146,7 @@ public class DutyService {
                     .filter(s -> !alreadyInDuty.contains(s.getId()))
                     .toList();
         } else if (role.getName().equals("Помічник ЧПУ")) {
-            List<String> assistantLastNames = List.of("Радківський", "Ходоровський", "Богаченко");
+            List<String> assistantLastNames = List.of("Радківський", "Ходоровський", "Богаченко", "Лобач");
             candidates = soldierRepository.findAll().stream()
                     .filter(s -> assistantLastNames.contains(s.getLastName()))
                     .filter(s -> !absentIds.contains(s.getId()))
@@ -226,7 +242,7 @@ public class DutyService {
                     .filter(s -> !alreadyInDuty.contains(s.getId()))
                     .toList();
         } else if (role.getName().equals("Помічник ЧПУ")) {
-            List<String> assistantLastNames = List.of("Радківський", "Ходоровський", "Богаченко");
+            List<String> assistantLastNames = List.of("Радківський", "Ходоровський", "Богаченко", "Лобач");
             return soldierRepository.findAll().stream()
                     .filter(s -> assistantLastNames.contains(s.getLastName()))
                     .filter(s -> !absentIds.contains(s.getId()))
